@@ -27,37 +27,51 @@ class Crud
 		return true;
 	}
 	
+	public function showAll()
+	{
+		
+	}
+	
+	public function showOne($id)
+	{
+		
+	}
 	
 	// processes input from a showCreate form, 
 	public function doCreate()
 	{
 		$model = new $this->model();
-		$props = \Schema::getColumnListing($model);
 		
-		foreach(Input::all() as $key => $value)
-		{
-			if(in_array($key, $props))
-			{
-				$model->$key = $value;
-			}
-		}
-		
-		$model->save();
-		
-		return $model->id;
+		return $this->updateFromInput($model);
 	
 	}
 	
 	// I want this form to be somewhat intelligent and define the inputs properly (numbers, switches, passwords, ect)
-	public function showCreate()
+	public function showCreate($specialTypes= [], $inputClass = 'form-control', $btnClass = 'btn btn-primary')
 	{
-	
+		$props = $this->getProps();
+		
+		foreach($props as $prop)
+		{
+			if(!in_array($prop, $this->readOnly))
+			{
+				(array_key_exists($prop, $specialTypes)) ? $type = $specialTypes[$prop] : $type = "";
+				
+				$formInput[] = "<input type='{$type}' name='{$prop}' id='{$prop}' class='{$inputClass}' />";
+			}
+		}
+		
+		$formInput[] = "<input type='submit' class='{$btnClass}' value='Create' />";
+
+		return $formInput;
 	
 	}
 	
-	public function doUpdate()
+	public function doUpdate($id)
 	{
-	
+		$model = $this->model->find($id);
+		
+		return $this->updateFromInput($model);
 	}
 	
 	public function showUpdate()
@@ -73,6 +87,31 @@ class Crud
 	public function showDelete()
 	{
 	
+	}
+	
+	private function getProps()
+	{
+		$model = new $this->model();
+		$props = \Schema::getColumnListing($model);
+		
+		return $props;
+	}
+	
+	private function updateFromInput($modelInstance)
+	{
+		$props = $this->getProps();
+		
+		foreach(Input::all() as $key => $value)
+		{
+			if(in_array($key, $props) && !in_array($key, $this->readOnly)) // needs to be in the database column, and can't be read only
+			{
+				$modelInstance->$key = $value;
+			}
+		}
+		
+		$modelInstance->save();
+		
+		return $modelInstance;
 	}
 
 
