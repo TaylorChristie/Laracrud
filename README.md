@@ -121,6 +121,36 @@ User extends Crud
 
 #Usage standalone
 ```php
+<?php
+
+use \MineSQL\Laracrud\Crud as Crud;
+
+
+SomeController extends BaseController 
+{
+
+    protected $crudL, $crudU;
+
+    public function __construct()
+    {
+        $this->crudL = Crud(App\Models\Logs);
+        $this->crudU = Crud(App\Models\User);
+    }
+
+    public function showUserInfoAndLogs($id)
+    {
+
+        $user = $this->crudU->getOne($id);
+        
+        $logs = $this->crudBL->getAll();
+        
+        return View::make('user/logs')->withLogs($logs)->withUser($user);
+    
+    }
+
+
+}
+
 
 
 ```
