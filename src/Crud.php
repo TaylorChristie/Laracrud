@@ -87,12 +87,14 @@ abstract class Crud
      */
     public function getAll(boolean $asTable = false) 
     {
-        $data = ($this->model)::all();
+        $props = $this->getProps();
+        
+        $data = ($this->model)::all($props);
     
         if($asTable) {
             $html = '';
             
-            foreach($this->getProps() as $prop) {
+            foreach($props as $prop) {
                 $html .= '<th>';
                 
                 foreach($prop as $one) {
@@ -124,7 +126,7 @@ abstract class Crud
      */
     public function getOne(int $id)
     {
-        $info = ($this->model)::findOrFail($id);
+        $info = ($this->model)::select($this->getProps())->findOrFail($id);
         
         return $info;
     }
