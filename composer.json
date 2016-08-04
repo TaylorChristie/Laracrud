@@ -5,7 +5,7 @@
     "license": "MIT",
     "minimum-stability": "stable",
     "require": {
-        "illuminate/database": "^5.2"
+        "illuminate/database": "*.*"
     },
     "autoload": {
         "psr-4": {
