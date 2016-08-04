@@ -1,5 +1,5 @@
 <?php
-namespace MineSQL\Laravel;
+namespace MineSQL\Laracrud;
 
 use Exception;
 use Illuminate\Database\Eloquent\Model;
