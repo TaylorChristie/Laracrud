@@ -2,8 +2,8 @@
 a simple to use CRUD extension to enable a programmer to quickly create CRUD structures in laravel. Very useful for administration panels.
 
 
-usage.
-```
+#Usage in a Controller
+```php
 <?php
 use \MineSQL\Laravel\Crud as Crud;
 
@@ -76,6 +76,23 @@ UserController extends Crud {
 
 
 }
+
+
+```
+
+
+#Usage in a Model
+```php
+<?php
+
+
+
+```
+
+
+
+#Usage standalone
+```php
 
 
 ```
