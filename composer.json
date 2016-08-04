@@ -1,0 +1,15 @@
+{
+    "name": "minesql/laracrud",
+    "description": "A simple to use CRUD extension to enable a programmer to quickly create CRUD structures in Laravel",
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "stable",
+    "require": {
+        "illuminate/database": "^5.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "MineSQL\\Laracrud\\": "src/"
+        }
+    }
+}
