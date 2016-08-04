@@ -79,7 +79,7 @@ User extends Crud
     public static function createCrudInstance()
     {
         $restricted = ['password', 'remember_key'];
-        return parent::__construct(self)->setReadonly($restricted)->setPrivate($restricted);
+        return parent::__construct(static::class)->setReadonly($restricted)->setPrivate($restricted);
     }
     
     public function create() // Creates a new user with Input::get() data
@@ -133,8 +133,8 @@ SomeController extends BaseController
 
     public function __construct()
     {
-        $this->crudL = Crud(App\Models\Logs);
-        $this->crudU = Crud(App\Models\User);
+        $this->crudL = Crud(App\Models\Logs::class);
+        $this->crudU = Crud(App\Models\User::class);
     }
 
     public function showUserInfoAndLogs($id)
