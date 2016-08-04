@@ -32,7 +32,7 @@ class UserController extends Crud {
   
     public function create()
     {
-        if(Request::isMethod("POST")) {
+        if(Request::isMethod('POST')) {
             $id = $this->doCreate();
             // can set the user password here if needed
         }
@@ -44,7 +44,7 @@ class UserController extends Crud {
   
     public function update($id)
     {
-        if(Request::isMethod("POST")) {
+        if(Request::isMethod('POST')) {
             $this->doUpdate($id);
         }
         
