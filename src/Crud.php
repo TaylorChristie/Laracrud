@@ -163,7 +163,7 @@ abstract class Crud
 
         foreach ($props as $prop) {
             if (!in_array($prop, $this->readOnly)) {
-                $type = $specialTypes[$prop] ?? '';
+                $type = $specialTypes[$prop] ?: '';
                 $formInput[] = "<input type='{$type}' name='{$prop}' id='input-{$prop}' class='{$inputClass}'>";
             }
         }
