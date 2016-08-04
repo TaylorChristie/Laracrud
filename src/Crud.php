@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Schema;
  * effort as possible.
  *
  * @author MineSQL
+ * @author ASDA
  */
 abstract class Crud
 {
@@ -78,19 +79,55 @@ abstract class Crud
     }
 
     /**
-     * Show all the elements to the user.
+     * get all the elements to the user, optionally show it as a table.
      *
+     * 
+     * @param boolean $asTable optional output as a table instead of a laravel collection
      * @return mixed
      */
-    abstract public function showAll();
+    public function getAll(boolean $asTable = 0) 
+    {
+        $data = ($this->model)::all();
+    
+        if($asTable) {
+            $html = '';
+            
+            foreach($this->getProps() as $prop) {
+                $html .= '<th>';
+                
+                foreach($prop as $one) {
+                    $html .= '<td>'.$one.'</td>';
+                }
+                $html .= '</th>';
+            }
+        
+            foreach($data as $row) {
+                $html .= '<tr>';
+                foreach($row as $value) {
+                    $html .= '<td>'.$value.'</td>';
+                }
+                $html .= '</tr>';
+            }
+            
+            return $html;
+        }
+        
+        return $data;
+        
+    }
 
     /**
-     * Show one of the elements to the user.
+     * get one of the elements to the user.
      *
      * @param int $id id of the element to read
      * @return mixed
      */
-    abstract public function showOne(int $id);
+    public function getOne(int $id)
+    {
+        $info = ($this->model)::findOrFail($id);
+        
+        return $info;
+    }
 
     /**
      * Processes input from a showCreate form.
@@ -147,12 +184,42 @@ abstract class Crud
         return $this->updateFromInput(($this->model)::findOrFail($id));
     }
 
-    /**
-     * Show the page after the user has updated the record.
+       /**
+     * Generate form inputs for a row to be updated. Use `$specialTypes` to map a property to a input type, ie:
      *
-     * @return mixed
+     * ```php
+     * 'id' => 'number',
+     * 'email_address' => 'email'
+     * ```
+     * @param integer $id the id of the row to be updated
+     * @param array  $specialTypes map database field to input type
+     * @param string $inputClass   classes to apply to each input
+     * @param string $btnClass     class the button should have
+     * @return array array of inputs
      */
-    abstract public function showUpdate();
+    public function showUpdate(
+        int $id,
+        array $specialTypes = [],
+        string $inputClass = 'form-control',
+        string $btnClass = 'btn btn-primary'
+    ) {
+        $row = ($this->model)::findOrFail($id);
+        $props = $this->getProps();
+
+        foreach ($props as $prop) {
+            
+            if (!in_array($prop, $this->readOnly)) {
+                
+                $value = $row->$prop;
+                $type = $specialTypes[$prop] ?? '';
+                $formInput[] = "<input type='{$type}' name='{$prop}' id='input-{$prop}' value='{$value}' class='{$inputClass}'>";
+            }
+        }
+
+        $formInput[] = "<input type='submit' class='{$btnClass}' value='Update'>";
+
+        return $formInput;
+    }
 
     /**
      * Delete a value from the database with id `$id`.
@@ -164,13 +231,6 @@ abstract class Crud
     {
         return ($this->model)::findOrFail($id)->delete();
     }
-
-    /**
-     * Show page after deleting value from database.
-     *
-     * @return mixed
-     */
-    abstract public function showDelete();
 
     /**
      * Get properties this user can edit (or view) from the database.
@@ -193,8 +253,8 @@ abstract class Crud
         $props = $this->getProps();
 
         foreach (Input::all() as $key => $value) {
-            if (in_array($key, $props) && !in_array($key, $this->readOnly)) {
-                // needs to be in the database column, and can't be read only
+            if (in_array($key, $props) && !in_array($key, $this->readOnly) && !in_array($key, $this->private)) {
+                // needs to be in the database column, and can't be read only, and can't be private
                 $modelInstance->$key = $value;
             }
         }
