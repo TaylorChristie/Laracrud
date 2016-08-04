@@ -85,7 +85,7 @@ abstract class Crud
      * @param boolean $asTable optional output as a table instead of a laravel collection
      * @return mixed
      */
-    public function getAll(boolean $asTable = 0) 
+    public function getAll(boolean $asTable = false) 
     {
         $data = ($this->model)::all();
     
