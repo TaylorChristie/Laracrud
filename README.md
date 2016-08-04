@@ -71,7 +71,48 @@ class UserController extends Crud {
 #Usage in a Model
 ```php
 <?php
+use \MineSQL\Laracrud\Crud as Crud;
 
+User extends Crud
+{
+
+    public static function createCrudInstance()
+    {
+        $restricted = ['password', 'remember_key'];
+        return parent::__construct(self)->setReadonly($restricted)->setPrivate($restricted);
+    }
+    
+    public function create() // Creates a new user with Input::get() data
+    {
+        return $this->doCreate();
+    }
+    
+    public function delete($id) // deletes user
+    {
+        return $this->doDelete($id);
+    }
+    
+    public function update($id) // updates user info
+    {
+        return $this->doUpdate($id);
+    }
+    
+    static public function updateForm($id)
+    {
+        $crud = self::createCrudInstance();
+        
+        return $crud->showCreate($id, ['email' => 'email']);
+        
+    }
+    
+    static public function createForm()
+    {
+        $crud = self::createCrudInstance();
+        
+        return $crud->showCreate(['email' => 'email']);
+    }
+
+}
 
 
 ```
