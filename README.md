@@ -97,7 +97,7 @@ User extends Crud
         return $this->doUpdate($id);
     }
     
-    static public function updateForm($id)
+    static public function updateInputs($id)
     {
         $crud = self::createCrudInstance();
         
@@ -105,7 +105,7 @@ User extends Crud
         
     }
     
-    static public function createForm()
+    static public function createInputs()
     {
         $crud = self::createCrudInstance();
         
