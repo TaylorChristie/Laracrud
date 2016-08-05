@@ -280,7 +280,7 @@ abstract class Crud extends \BaseController
      * @param Model $modelInstance record to update values for.
      * @return mixed
      */
-    private function updateFromInput($modelInstance)
+    private function updateFromInput(Model $modelInstance)
     {
         $props = $this->getProps();
 
