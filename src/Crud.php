@@ -95,6 +95,8 @@ abstract class Crud extends \BaseController
      *
      * 
      * @param mixed $asTable optional output as a table instead of a laravel collection
+     * @param string $editUrl the laravel URL that directs to an edit page ie: users/edit --> users/edit/4 where 4 = user id
+     * @param string $deleteUrl same as the edit url, except it is to the delete route
      * @return mixed
      */
     public function getAll($asTable = 0, $editUrl, $deleteUrl) 
