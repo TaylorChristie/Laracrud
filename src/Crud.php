@@ -117,7 +117,7 @@ abstract class Crud extends \BaseController
 
                 $html .= '<th>'.ucwords(str_replace('_', ' ', $prop)).'</th>';
             }
-            $html .= '</tr></thead>';
+            $html .= '</tr></thead><tbody>';
         
             foreach($data as $row) {
                 $row['action'] = '<a href="'.\URL::to($editUrl.'/'.$row['attributes']['id']).'" class="btn btn-warning">Edit</a> <a href="'.\URL::to($deleteUrl).'/'.$row['attributes']['id'].'" onClick="return confirm(\'Are you sure you want to delete this record permmanently?\')" class="btn btn-danger">Delete</a>';
@@ -127,6 +127,7 @@ abstract class Crud extends \BaseController
                 }
                 $html .= '</tr>';
             }
+            $html .= '</tbody>';
             
             return $html;
         }
@@ -258,7 +259,7 @@ abstract class Crud extends \BaseController
     public function doDelete($id)
     {
         $i = $this->model;
-        
+
         return $i::findOrFail($id)->delete();
     }
 
