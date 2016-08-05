@@ -16,12 +16,9 @@ use \MineSQL\Laracrud\Crud as Crud;
 class UserController extends Crud {
     public function __construct()
     {
-        $modelName = '\User'; // The fully qualified name of the model
-        $tableName = 'users'; // the name of the table that corresponds to the model
-        
         $restricted = ['email_address'];
         $private = ['password', 'remember_key'];
-        parent::__construct($modelName, $tableName)->setReadonly($restricted)->setPrivate($private);
+        parent::__construct(\User::class)->setReadonly($restricted)->setPrivate($private);
     }
   
     public function showAll()
@@ -87,13 +84,13 @@ User extends Crud
 
     public function __construct()
     {
-        parent::__construct(get_class(static::class, 'tablename'))->setReadonly($restricted)->setPrivate($restricted);
+        parent::__construct(static::class)->setReadonly($restricted)->setPrivate($restricted);
     }
 
     public static function createCrudInstance()
     {
         $restricted = ['password', 'remember_key'];
-        return parent::__construct(get_class(static::class, 'tablename'))->setReadonly($restricted)->setPrivate($restricted);
+        return parent::__construct(static::class)->setReadonly($restricted)->setPrivate($restricted);
     }
     
     public function create() // Creates a new user with Input::get() data
@@ -147,8 +144,8 @@ SomeController extends BaseController
 
     public function __construct()
     {
-        $this->crudL = Crud(App\Models\Logs::class, 'table2');
-        $this->crudU = Crud(App\Models\User::class, 'table1');
+        $this->crudL = Crud(App\Models\Logs::class);
+        $this->crudU = Crud(App\Models\User::class);
     }
 
     public function showUserInfoAndLogs($id)
