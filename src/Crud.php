@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Schema;
  * @author MineSQL
  * @author ASDA
  */
-abstract class Crud
+abstract class Crud extends \BaseController
 {
     /**
      * Elements that can not be overwritten by the user in a request.
@@ -34,7 +34,10 @@ abstract class Crud
      *
      * @var mixed
      */
-    private $model;
+    public $model;
+
+
+    public $modelName;
 
     /**
      * Construct a new CRUD handler. Note: this method should always be overridden, then parent::__construct() called in
@@ -47,9 +50,11 @@ abstract class Crud
      * @param mixed $model model to perform CRUD operations on.
      * @throws Exception
      */
-    public function __construct($model)
+    public function __construct($model, $table)
     {
-        $this->model = $model;
+        $this->model = new $model();
+        $this->modelName = $table;
+
     }
 
     /**
@@ -85,27 +90,30 @@ abstract class Crud
      * @param boolean $asTable optional output as a table instead of a laravel collection
      * @return mixed
      */
-    public function getAll(boolean $asTable = false) 
+    public function getAll($asTable = null, $editUrl, $deleteUrl) 
     {
         $props = $this->getProps();
-        
-        $data = ($this->model)::all($props);
-    
+        $props[] = 'actions';
+
+        $i = $this->model;
+        $data = $i::all();
+
+
         if($asTable) {
             $html = '';
             
+            $html .= '<thead><tr>';
+
             foreach($props as $prop) {
-                $html .= '<th>';
-                
-                foreach($prop as $one) {
-                    $html .= '<td>'.$one.'</td>';
-                }
-                $html .= '</th>';
+
+                $html .= '<th>'.ucwords(str_replace('_', ' ', $prop)).'</th>';
             }
+            $html .= '</tr></thead>';
         
             foreach($data as $row) {
+                $row['action'] = '<a href="'.\URL::to($editUrl.'/'.$row['attributes']['id']).'" class="btn btn-warning">Edit</a> <a href="'.\URL::to($deleteUrl).'/'.$row['attributes']['id'].'" onClick="return confirm(\'Are you sure you want to delete this record permmanently?\')" class="btn btn-danger">Delete</a>';
                 $html .= '<tr>';
-                foreach($row as $value) {
+                foreach($row['attributes'] as $value) {
                     $html .= '<td>'.$value.'</td>';
                 }
                 $html .= '</tr>';
@@ -126,7 +134,9 @@ abstract class Crud
      */
     public function getOne(int $id)
     {
-        $info = ($this->model)::select($this->getProps())->findOrFail($id);
+        $i = $this->model;
+
+        $info = $i::select($this->getProps())->findOrFail($id);
         
         return $info;
     }
@@ -138,9 +148,9 @@ abstract class Crud
      */
     public function doCreate()
     {
-        $model = new $this->model;
+        $i = $this->model;
 
-        return $this->updateFromInput($model);
+        return $this->updateFromInput($i);
     }
 
     /**
@@ -152,21 +162,23 @@ abstract class Crud
      * ```
      *
      * @param array  $specialTypes map database field to input type
-     * @param string $inputClass   classes to apply to each input
-     * @param string $btnClass     class the button should have
+     * @param mixed $inputClass   classes to apply to each input
+     * @param mixed $btnClass     class the button should have
      * @return array array of inputs
      */
     public function showCreate(
         array $specialTypes = [],
-        string $inputClass = 'form-control',
-        string $btnClass = 'btn btn-primary'
+        $inputClass = 'form-control',
+        $btnClass = 'btn btn-primary'
     ) {
         $props = $this->getProps();
 
         foreach ($props as $prop) {
             if (!in_array($prop, $this->readOnly)) {
-                $type = $specialTypes[$prop] ?? '';
-                $formInput[] = "<input type='{$type}' name='{$prop}' id='input-{$prop}' class='{$inputClass}'>";
+
+                $type = isset($specialTypes[$prop]) ? $specialTypes[$prop] : '';
+
+                $formInput[] = "<label>{$prop}</label><input type='{$type}' name='{$prop}' id='input-{$prop}' class='{$inputClass}'>";
             }
         }
 
@@ -181,9 +193,11 @@ abstract class Crud
      * @param int $id record to update
      * @return mixed
      */
-    public function doUpdate(int $id)
+    public function doUpdate($id)
     {
-        return $this->updateFromInput(($this->model)::findOrFail($id));
+        $i = $this->model;
+
+        return $this->updateFromInput($i::findOrFail($id));
     }
 
        /**
@@ -195,17 +209,20 @@ abstract class Crud
      * ```
      * @param integer $id the id of the row to be updated
      * @param array  $specialTypes map database field to input type
-     * @param string $inputClass   classes to apply to each input
-     * @param string $btnClass     class the button should have
+     * @param mixed $inputClass   classes to apply to each input
+     * @param mixed $btnClass     class the button should have
      * @return array array of inputs
      */
     public function showUpdate(
-        int $id,
+        $id,
         array $specialTypes = [],
-        string $inputClass = 'form-control',
-        string $btnClass = 'btn btn-primary'
+        $inputClass = 'form-control',
+        $btnClass = 'btn btn-primary'
     ) {
-        $row = ($this->model)::findOrFail($id);
+        $i = $this->model;
+
+        $row = $i::findOrFail($id);
+
         $props = $this->getProps();
 
         foreach ($props as $prop) {
@@ -213,8 +230,8 @@ abstract class Crud
             if (!in_array($prop, $this->readOnly)) {
                 
                 $value = $row->$prop;
-                $type = $specialTypes[$prop] ?? '';
-                $formInput[] = "<input type='{$type}' name='{$prop}' id='input-{$prop}' value='{$value}' class='{$inputClass}'>";
+                $type = isset($specialTypes[$prop]) ? $specialTypes[$prop] : '';
+                $formInput[] = "<label>{$prop}</label><input type='{$type}' name='{$prop}' id='input-{$prop}' value='{$value}' class='{$inputClass}'>";
             }
         }
 
@@ -229,9 +246,10 @@ abstract class Crud
      * @param int $id id of the record to delete
      * @return mixed
      */
-    public function doDelete(int $id)
+    public function doDelete($id)
     {
-        return ($this->model)::findOrFail($id)->delete();
+        $i = $this->model;
+        return $i::findOrFail($id)->delete();
     }
 
     /**
@@ -241,7 +259,7 @@ abstract class Crud
      */
     private function getProps()
     {
-        return array_diff(Schema::getColumnListing(new $this->model), $this->private);
+        return array_diff(Schema::getColumnListing($this->modelName), $this->private);
     }
 
     /**
