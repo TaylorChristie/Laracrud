@@ -20,7 +20,7 @@ abstract class Crud extends \BaseController
      *
      * @var array
      */
-    private $readOnly = ['id', 'created_at', 'updated_at'];
+    private $readOnly = ['id', 'created_at', 'updated_at']; // default 
 
     /**
      * Elements that cannot be read or edited by the user.
@@ -30,14 +30,18 @@ abstract class Crud extends \BaseController
     private $private = [];
 
     /**
-     * Model to handle CRUD operations for.
+     * Model instance to handle builtin Model:: methods.
      *
      * @var mixed
      */
-    public $model;
+    private $model;
 
-
-    public $modelName;
+    /**
+     * Table Name for Schema:: operations
+     *
+     * @var mixed
+     */
+    private $modelName;
 
     /**
      * Construct a new CRUD handler. Note: this method should always be overridden, then parent::__construct() called in
@@ -47,13 +51,16 @@ abstract class Crud extends \BaseController
      * parent::__construct(App\Models\MyModel::class);
      * ```
      *
-     * @param mixed $model model to perform CRUD operations on.
+     * @param string $model the absolute name of the Model to perform CRUD operations on. (and to be initalized)
+     * @param string $table the table name to perform Schema:: operations (get table properties)
      * @throws Exception
      */
     public function __construct($model, $table)
     {
         $this->model = new $model();
         $this->modelName = $table;
+
+        return $this;
 
     }
 
@@ -87,16 +94,18 @@ abstract class Crud extends \BaseController
      * get all the elements to the user, optionally show it as a table.
      *
      * 
-     * @param boolean $asTable optional output as a table instead of a laravel collection
+     * @param mixed $asTable optional output as a table instead of a laravel collection
      * @return mixed
      */
-    public function getAll($asTable = null, $editUrl, $deleteUrl) 
+    public function getAll($asTable = 0, $editUrl, $deleteUrl) 
     {
         $props = $this->getProps();
-        $props[] = 'actions';
+       
 
         $i = $this->model;
-        $data = $i::all();
+        $data = $i::all($props);
+
+         $props[] = 'actions';
 
 
         if($asTable) {
@@ -129,10 +138,10 @@ abstract class Crud extends \BaseController
     /**
      * get one of the elements to the user.
      *
-     * @param int $id id of the element to read
+     * @param mixed $id id of the element to read
      * @return mixed
      */
-    public function getOne(int $id)
+    public function getOne($id)
     {
         $i = $this->model;
 
@@ -190,7 +199,7 @@ abstract class Crud extends \BaseController
     /**
      * Update record `$id` with values passed by the user in the input array.
      *
-     * @param int $id record to update
+     * @param mixed $id record to update
      * @return mixed
      */
     public function doUpdate($id)
@@ -207,7 +216,7 @@ abstract class Crud extends \BaseController
      * 'id' => 'number',
      * 'email_address' => 'email'
      * ```
-     * @param integer $id the id of the row to be updated
+     * @param mixed $id the id of the row to be updated
      * @param array  $specialTypes map database field to input type
      * @param mixed $inputClass   classes to apply to each input
      * @param mixed $btnClass     class the button should have
@@ -243,12 +252,13 @@ abstract class Crud extends \BaseController
     /**
      * Delete a value from the database with id `$id`.
      *
-     * @param int $id id of the record to delete
+     * @param mixed $id id of the record to delete
      * @return mixed
      */
     public function doDelete($id)
     {
         $i = $this->model;
+        
         return $i::findOrFail($id)->delete();
     }
 
