@@ -52,13 +52,12 @@ abstract class Crud extends \BaseController
      * ```
      *
      * @param string $model the absolute name of the Model to perform CRUD operations on. (and to be initalized)
-     * @param string $table the table name to perform Schema:: operations (get table properties)
      * @throws Exception
      */
-    public function __construct($model, $table)
+    public function __construct($model)
     {
         $this->model = new $model();
-        $this->modelName = $table;
+        $this->modelName = $this->model->getTable();
 
         return $this;
 
