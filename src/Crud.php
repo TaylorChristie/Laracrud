@@ -51,17 +51,13 @@ abstract class Crud extends \BaseController
      * parent::__construct(App\Models\MyModel::class);
      * ```
      *
-     * @param string $model the absolute name of the Model to perform CRUD operations on. (and to be initalized)
-     * @param string $table the table name to perform Schema:: operations (get table properties)
+     * @param string $model the absolute class name of the Model to perform CRUD operations on. (and to be initalized)
      * @throws Exception
      */
-    public function __construct($model, $table)
+    public function __construct($model)
     {
         $this->model = new $model();
-        $this->modelName = $table;
-
-        return $this;
-
+        $this->modelName = $this->model->getTable();
     }
 
     /**
@@ -186,7 +182,7 @@ abstract class Crud extends \BaseController
         $props = $this->getProps();
 
         foreach ($props as $prop) {
-            if (!in_array($prop, $this->readOnly)) {
+            if (!in_array($prop, $this->readOnly) || !in_array($prop, $this->private)) {
 
                 $type = isset($specialTypes[$prop]) ? $specialTypes[$prop] : '';
 
